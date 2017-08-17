@@ -11,10 +11,10 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Logging
 open Newtonsoft.Json
-open Giraffe.Tasks
-open Giraffe.HttpHandlers
-open Giraffe.Middleware
-open Giraffe.HttpContextExtensions
+open Juraff.Tasks
+open Juraff.HttpHandlers
+open Juraff.Middleware
+open Juraff.HttpContextExtensions
 open ServiceStack.Text
 open HCup.Models
 open HCup.RequestCounter
