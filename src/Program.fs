@@ -9,6 +9,7 @@ open System.Threading.Tasks
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Http
+open Microsoft.AspNetCore.Server.Kestrel.Core
 open Microsoft.Extensions.Logging
 open Newtonsoft.Json
 open Juraff.Tasks
@@ -347,6 +348,9 @@ let configureApp (app : IApplicationBuilder) =
     app.UseGiraffeErrorHandler errorHandler
     app.UseGiraffe webApp
 
+let configureKestrel (options : KestrelServerOptions) = 
+    options.AllowSynchronousIO <- true
+
 let loadData folder =
     try
         Directory.EnumerateFiles(folder, "locations_*.json")
@@ -396,7 +400,7 @@ let main argv =
     loadData "./data"
 
     WebHostBuilder()
-        .UseKestrel()
+        .UseKestrel(Action<KestrelServerOptions> configureKestrel)
         .Configure(Action<IApplicationBuilder> configureApp)
         .Build()
         .Run()
