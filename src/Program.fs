@@ -12,17 +12,35 @@ open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Server.Kestrel.Core
 open Microsoft.AspNetCore.Server.Kestrel.Transport
 open Microsoft.Extensions.Logging
-open Newtonsoft.Json
 open Juraff.Tasks
 open Juraff.HttpHandlers
 open Juraff.Middleware
 open Juraff.HttpContextExtensions
-open ServiceStack.Text
 open HCup.Models
 open HCup.RequestCounter
 open HCup.Actors
 open HCup.Router
 open HCup.Parser
+
+
+open Chiron
+open Chiron.Operators
+open Chiron.JsonTransformer.Operators
+open Chiron.JsonTransformer.Json
+open Chiron.Serialization
+open Chiron.Builders
+open Chiron.Formatting
+open Chiron.Inference
+open Chiron.JsonResult
+open Chiron.Patterns
+open Chiron.Parsing
+open Chiron.JsonObject
+open Chiron.Decoder
+open Chiron.Json
+open Chiron.Optics
+open Chiron.Optics.Json
+open Chiron.Optics.JsonObject
+open Chiron.JsonFailure
 
 // ---------------------------------
 // Web app
@@ -52,11 +70,31 @@ let visitUsers = Array.zeroCreate<VisitsCollection> UsersSize
 
 type UpdateEntity<'a> = 'a -> HttpContext -> Task<'a>
  
-let serializeObject obj =
-    JsonSerializer.SerializeToString(obj)
+let serializeLocation (loc : Location) =    
+    JsonObject.WriteObject [
+        ("id", Json.Encode.int loc.id)
+        ("distance", Json.Encode.uint16 loc.distance)
+        ("city", Json.Encode.string loc.city)
+        ("country", Json.Encode.string loc.country)
+        ("place", Json.Encode.string loc.place)
+    ] |> Json.serialize
 
-let deserializeObject<'a> str =
-    JsonSerializer.DeserializeFromString<'a>(str)
+let createLocation id distance city country place = 
+    { id = id; distance = distance; city = city; country = country; place = place }
+
+let deserializeLocation (str: string) =    
+    let result = match Json.parse str with
+                    | JPass json -> Some json
+                    | _ -> None
+    match result with 
+    | Some obj -> 
+
+    // createLocation
+    // <!> Json.Decode.required Json.Decode.int    "id" str
+    // <*> Json.Decode.required Json.Decode.uint16    "distance" str
+    // <*> Json.Decode.required Json.Decode.string "city"   
+    // <*> Json.Decode.required Json.Decode.string "country"   
+    // <*> Json.Decode.required Json.Decode.string "place"   
 
 let jsonCustom obj (next : HttpFunc) (httpContext: HttpContext) =
     json obj next httpContext
